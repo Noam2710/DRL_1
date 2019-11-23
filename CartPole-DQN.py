@@ -21,7 +21,6 @@ DECAYING_EPSILON = 0.9995
 EXPLORATION_MIN = 0.02
 window_size = 100
 THRESHOLD = 475
-best_run = 159
 NUMBER_OF_LAYERS = 3
 
 
@@ -58,7 +57,7 @@ def print_figures(data_holder,time):
     axs[3].set_xlabel('Episode')
     axs[3].set_ylabel('Epsilon')
 
-    fig.savefig('./figures/results-{}-cartpole.png'.format(str(time)))
+    fig.savefig('./figures/{}hiddenlayers/results-{}-cartpole.png'.format(NUMBER_OF_LAYERS,str(time)))
 
 
 class DQN:
@@ -70,8 +69,11 @@ class DQN:
     def init_model(self):
         model = Sequential()
         model.add(Dense(24, input_shape=(self.obs_space,), activation="relu"))
-        model.add(Dense(24, activation="relu"))
-        model.add(Dense(24, activation="relu"))
+
+        for layer in range(NUMBER_OF_LAYERS-1):
+            model.add(Dense(24, activation="relu"))
+            model.add(Dense(24, activation="relu"))
+
         model.add(Dense(self.act_space, activation="linear"))
         model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
         return model
@@ -173,15 +175,12 @@ while True:
                 data_holder.append([episode_index, step, dqn_owner.exploration_rate, running_average])
                 break
 
-        if episode_index > best_run:
-            break
 
         if running_average > THRESHOLD:
-            best_run = episode_index
             data_holder = np.array(data_holder)
-            np.save('./data_holders/{}.h5'.format(episode_index), data_holder)
+            np.save('./data_holders/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,episode_index), data_holder)
             time = datetime.now().strftime("%m-%d-%Y-%H-%M-%S-episode-break-{}".format(episode_index))
-            dqn_owner.target_model.model.save('./weights/{}.h5'.format(time))
+            dqn_owner.target_model.model.save('./weights/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,time))
             print_figures(data_holder, time)
             break
 
