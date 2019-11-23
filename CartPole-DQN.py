@@ -22,6 +22,7 @@ EXPLORATION_MIN = 0.02
 window_size = 100
 THRESHOLD = 475
 best_run = 159
+NUMBER_OF_LAYERS = 3
 
 
 def get_list_of_average_losses():
