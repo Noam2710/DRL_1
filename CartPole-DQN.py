@@ -58,7 +58,7 @@ def print_figures(data_holder,time):
     axs[3].set_xlabel('Episode')
     axs[3].set_ylabel('Epsilon')
 
-    fig.savefig('./figures/{}hiddenlayers/results-{}-cartpole.png'.format(NUMBER_OF_LAYERS,str(time)))
+    fig.savefig('./CartPoleResults/figures/{}hiddenlayers/results-{}-cartpole.png'.format(NUMBER_OF_LAYERS,str(time)))
 
 
 class DQN:
@@ -180,8 +180,8 @@ while True:
             best_result = episode_index
             data_holder = np.array(data_holder)
             time = datetime.now().strftime("%m-%d-%Y-%H-%M-%S-episode-break-{}".format(episode_index))
-            np.save('./data_holders/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,episode_index), data_holder)
-            dqn_owner.target_model.model.save('./weights/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,time))
+            np.save('./CartPoleResults/data_holders/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,episode_index), data_holder)
+            dqn_owner.target_model.model.save('./CartPoleResults/weights/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,time))
             print_figures(data_holder, time)
             break
 
