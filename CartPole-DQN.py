@@ -89,7 +89,7 @@ class DQN_Owner:
         self.copy_fit_model_weights_to_target()
         self.memory = deque(maxlen=MEMORY_LENGTH)
         self.exploration_rate = INIT_EXPLORE_RATE
-        self.epochs_without_updates = 0
+        self.steps_without_updates = 0
         self.maximum_epochs_without_updates = 16
 
     def choose_action(self, state):
@@ -136,11 +136,11 @@ class DQN_Owner:
             self.exploration_rate *= DECAYING_EPSILON
 
     def update_target_network_if_necessary(self):
-        if self.epochs_without_updates == self.maximum_epochs_without_updates:
-            self.epochs_without_updates = 0
+        if self.steps_without_updates == self.maximum_epochs_without_updates:
+            self.steps_without_updates = 0
             self.copy_fit_model_weights_to_target()
         else:
-            self.epochs_without_updates += 1
+            self.steps_without_updates += 1
 
 
 while True:
