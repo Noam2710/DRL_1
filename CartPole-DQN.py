@@ -21,7 +21,8 @@ DECAYING_EPSILON = 0.9995
 EXPLORATION_MIN = 0.02
 window_size = 100
 THRESHOLD = 475
-NUMBER_OF_LAYERS = 3
+NUMBER_OF_LAYERS = 5
+best_result = 500
 
 
 def get_list_of_average_losses():
@@ -151,7 +152,7 @@ while True:
     steps = []
     episodes_to_losses = dict()
 
-    for episode_index in range(500):
+    for episode_index in range(best_result):
         episodes_to_losses[episode_index] = []
         current_state = env.reset()
         current_state = np.reshape(current_state, [1, obs_space])
@@ -175,11 +176,11 @@ while True:
                 data_holder.append([episode_index, step, dqn_owner.exploration_rate, running_average])
                 break
 
-
         if running_average > THRESHOLD:
+            best_result = episode_index
             data_holder = np.array(data_holder)
-            np.save('./data_holders/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,episode_index), data_holder)
             time = datetime.now().strftime("%m-%d-%Y-%H-%M-%S-episode-break-{}".format(episode_index))
+            np.save('./data_holders/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,episode_index), data_holder)
             dqn_owner.target_model.model.save('./weights/{}hiddenlayers/{}.h5'.format(NUMBER_OF_LAYERS,time))
             print_figures(data_holder, time)
             break
