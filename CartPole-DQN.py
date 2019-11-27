@@ -1,13 +1,13 @@
 
 import matplotlib.pyplot as plt
 import random, gym, numpy as np
-import tensorflow as tf
+from ModifiedTensorBoard import ModifiedTensorBoard
+
 
 from collections import deque
 from keras.models import Sequential, load_model
 from keras.layers import Dense
 from keras.optimizers import Adam
-from keras.callbacks import TensorBoard
 
 from statistics import mean
 from datetime import datetime
@@ -26,39 +26,6 @@ THRESHOLD = 475
 NUMBER_OF_LAYERS = 5
 best_result = 250
 episodes_to_losses = dict()
-
-
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.step = 1
-        self.writer = tf.summary.FileWriter(self.log_dir)
-
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
-
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
-    def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
-
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
-    def on_batch_end(self, batch, logs=None):
-        pass
-
-    # Overrided, so won't close writer
-    def on_train_end(self, _):
-        pass
-
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
-    def update_stats(self, **stats):
-        self._write_logs(stats, self.step)
-
 
 class DQN:
     def __init__(self, obs_space, act_space):

@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+from ModifiedTensorBoard import ModifiedTensorBoard
 
 epsilon = 1
 number_of_episodes = 5000
@@ -18,6 +19,26 @@ env = gym.make('FrozenLake-v0')
 data_holder = []
 
 Q = np.zeros((env.observation_space.n, env.action_space.n))
+
+
+def print_tests_in_TensorBoard(path_for_file_or_name_of_file=None, read_from_file=False, data_holder=None):
+    if read_from_file:
+        data_holder_to_visualize = np.load(path_for_file_or_name_of_file)
+        name_of_log_dir = '{}-{}'.format(path_for_file_or_name_of_file.split("/")[3],
+                                         path_for_file_or_name_of_file.split("/")[4])
+        name_of_log_dir = name_of_log_dir.split('.')[0]
+        name_of_log_dir += datetime.now().strftime("-%m-%d-%Y-%H-%M-%S")
+    else:
+        data_holder_to_visualize = data_holder
+        name_of_log_dir = path_for_file_or_name_of_file
+
+    tensorboard = ModifiedTensorBoard(log_dir="logs/{}".format(name_of_log_dir))
+
+    for data_of_episode in data_holder_to_visualize:
+        tensorboard.step = data_of_episode[0]
+        tensorboard.update_stats(Number_of_steps=data_of_episode[1],
+                                 cumulative_reward=data_of_episode[2],
+                                 epsilon=data_of_episode[3])
 
 
 def print_figures(data_holder):
@@ -118,8 +139,10 @@ for episode in range(number_of_episodes):
         plot_color_maps(episode)
 
 
+
 data_holder = np.array(data_holder)
-print_figures(data_holder)
+# print_figures(data_holder)
+print_tests_in_TensorBoard(path_for_file_or_name_of_file="FrozenLake",data_holder=data_holder)
 
 
 
