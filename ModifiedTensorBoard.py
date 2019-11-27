@@ -1,7 +1,7 @@
 from keras.callbacks import TensorBoard
 import tensorflow as tf
 
-
+"Was taken from https://pythonprogramming.net/training-deep-q-learning-dqn-reinforcement-learning-python-tutorial/"
 class ModifiedTensorBoard(TensorBoard):
 
     # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
