@@ -41,34 +41,6 @@ def print_tests_in_TensorBoard(path_for_file_or_name_of_file=None, read_from_fil
                                  epsilon=data_of_episode[3])
 
 
-def print_figures(data_holder):
-    figure, ax = plt.subplots(3, figsize=[12, 12])
-
-    # Number of steps
-    ax[0].plot(data_holder[:, 0], data_holder[:, 1], '.')
-    ax[0].set_xlabel('Episode')
-    ax[0].set_ylabel('Number of steps')
-    ax[0].plot(data_holder[window_size - 1:, 0], running_average(data_holder[:, 1], window_size))
-
-    # Cumulative reward
-    ax[1].plot(data_holder[:, 0], data_holder[:, 2], '.')
-    ax[1].set_xlabel('Episode')
-    ax[1].set_ylabel('Cumulative rewards')
-    ax[1].plot(data_holder[window_size - 1:, 0], running_average(data_holder[:, 2], window_size))
-
-    # Epsilon
-    ax[2].plot(data_holder[:, 0], data_holder[:, 3], '.')
-    ax[2].set_xlabel('Episode')
-    ax[2].set_ylabel('Epsilon')
-
-    time = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
-    figure.savefig('./results-' + time + '.png')
-
-
-def running_average(data, window_size):
-    return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
-
-
 def learning(old_state, new_state, reward, action):
     old_q = Q[old_state, action]
     temp_q = reward + gamma * np.max(Q[new_state, :])
@@ -139,9 +111,7 @@ for episode in range(number_of_episodes):
         plot_color_maps(episode)
 
 
-
 data_holder = np.array(data_holder)
-# print_figures(data_holder)
 print_tests_in_TensorBoard(path_for_file_or_name_of_file="FrozenLake",data_holder=data_holder)
 
 

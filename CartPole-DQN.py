@@ -24,7 +24,7 @@ EXPLORATION_MIN = 0.02
 window_size = 100
 THRESHOLD = 475
 NUMBER_OF_LAYERS = 5
-best_result = 250
+best_result = 300
 episodes_to_losses = dict()
 
 class DQN:
@@ -47,7 +47,7 @@ class DQN:
 
 
 class DQN_Owner:
-    def __init__(self, obs_space, act_space):
+    def __init__(self, obs_space, act_space, ddqn=False):
         self.obs_space = obs_space
         self.act_space = act_space
         self.target_model = DQN(obs_space, act_space)
@@ -56,7 +56,9 @@ class DQN_Owner:
         self.experience_replay = deque(maxlen=MEMORY_LENGTH)
         self.exploration_rate = INIT_EXPLORE_RATE
         self.steps_without_updates = 0
-        self.maximum_epochs_without_updates = 16
+        self.maximum_epochs_without_updates = 32
+        self.ddqn = ddqn
+
 
     def sample_action(self, state):
         if np.random.rand() < self.exploration_rate:
@@ -71,10 +73,16 @@ class DQN_Owner:
         if len(self.experience_replay) > BATCH_SIZE:
             current_batch = self.sample_batch()
             for state, action, reward, next_state, finished in current_batch:
+                target_model_predication = self.target_model.model.predict(next_state)[0]
+
                 if finished:
                     q = reward
                 else:
-                    q = reward + GAMMA * np.amax(self.target_model.model.predict(next_state)[0])
+                    if self.ddqn:
+                        action_from_behavior_model = np.argmax(self.behaviour_model.model.predict(next_state))
+                        q = reward + GAMMA * target_model_predication[action_from_behavior_model]
+                    else:
+                        q = reward + GAMMA * np.amax(target_model_predication)
 
                 q_values = self.target_model.model.predict(state)
                 q_values[0][action] = q
@@ -127,27 +135,6 @@ def running_average(data, window_size):
     return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
 
 
-def print_figures(data_holder,time):
-    fig, axs = plt.subplots(4, figsize=[12, 12])
-    axs[0].plot(data_holder[:, 0], data_holder[:, 1])
-    axs[0].set_xlabel('Episode')
-    axs[0].set_ylabel('Total Reward')
-
-    axs[1].plot(data_holder[:, 0], data_holder[:, 3])
-    axs[1].set_xlabel('Episode')
-    axs[1].set_ylabel('Running Average')
-
-    axs[2].plot(list(range(len(episodes_to_losses))), get_list_of_average_losses())
-    axs[2].set_xlabel('Episode')
-    axs[2].set_ylabel('Loss')
-
-    axs[3].plot(data_holder[:, 0], data_holder[:, 2])
-    axs[3].set_xlabel('Episode')
-    axs[3].set_ylabel('Epsilon')
-
-    fig.savefig('./CartPoleResults/figures/{}hiddenlayers/results-{}-cartpole.png'.format(NUMBER_OF_LAYERS,str(time)))
-
-
 def train_agent():
     while True:
         global best_result, episodes_to_losses
@@ -155,7 +142,7 @@ def train_agent():
         env = gym.make("CartPole-v1")
         obs_space = env.observation_space.shape[0]
         act_space = env.action_space.n
-        dqn_owner = DQN_Owner(obs_space, act_space)
+        dqn_owner = DQN_Owner(obs_space, act_space, ddqn=True)
         steps = []
         episodes_to_losses = dict()
 
@@ -182,6 +169,8 @@ def train_agent():
                                                                                                     )))
                     data_holder.append([episode_index, step, dqn_owner.exploration_rate, running_average])
                     break
+            if episode_index == 100 and 500 not in steps:
+                break
 
             if running_average > THRESHOLD:
                 best_result = episode_index
@@ -241,8 +230,6 @@ def print_tests_in_TensorBoard(path_for_file_or_name_of_file=None, read_from_fil
 
 train_agent()
 # test_agent()
-# print_tests_in_TensorBoard('./CartPoleResults/data_holders/3hiddenlayers/154.h5.npy')
-
 
 
 
