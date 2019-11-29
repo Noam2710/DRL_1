@@ -1,1 +1,1 @@
-First Assignemnt Deep Reinforcement Learning course
+First Assignemnt on Deep Reinforcement Learning course
